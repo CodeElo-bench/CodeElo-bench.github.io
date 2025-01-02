@@ -1,0 +1,1403 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CodeElo</title>
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+    />
+    <link rel="icon" sizes="32x32" href="static/images/single-logo-removebg-preview.png" />
+
+    <style>
+      html,
+      body {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+
+      .container {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+      }
+
+      table {
+        /* max-width: none; */
+        max-width: 1100px;
+        border-collapse: collapse;
+        margin: 0 auto;
+        display: block;
+        overflow-x: auto;
+      }
+
+      .header,
+      .buttons,
+      .footer,
+      .key {
+        flex-shrink: 0;
+      }
+
+      .header {
+        margin-top: 10px;
+        margin-bottom: 10px;
+      }
+
+      .footer {
+        padding: 10px;
+        font-size: 12px;
+      }
+
+      .scrollable-div {
+        overflow-x: auto; /* 添加水平滚动 */
+        max-width: 100%; /* 限制最大宽度 */
+        background-color: #f5f5f5;
+        padding: 10px;
+        border-radius: 10px;
+        border: 1px solid black;
+      }
+
+      .buttons {
+        margin-top: 10px;
+      }
+
+      .btn {
+        font-family: kefa;
+        margin-bottom: 7px;
+      }
+
+      .left-col {
+        width: 150px; /* 减小左侧列宽 */
+        min-width: 150px; /* 确保不会太窄 */
+      }
+
+      table tr,
+      table td {
+        border: none !important;
+      }
+      .bottom-border {
+        border-bottom: 1px solid gray !important;
+      }
+
+      .key-item {
+        margin-left: 2px;
+        margin-right: 2px;
+      }
+
+      .key-item::before {
+        content: ""; /* This is necessary for the pseudo-element to work */
+        display: inline-block;
+        width: 19px; /* Width of the square */
+        height: 19px; /* Height of the square */
+        margin-right: 5px; /* Space between the square and the text */
+        vertical-align: middle; /* Aligns the square with the text */
+        border: 1px solid black; /* Border around the square */
+        border-radius: 2px; /* Rounded corners */
+      }
+
+      .key-item.correct::before {
+        background-color: #3ebd66; /* Color for "Correct" */
+      }
+
+      .key-item.incorrect::before {
+        background-color: rgb(255 187 187); /* Color for "Incorrect" */
+      }
+      .drop {
+        display: flex;
+      }
+      .typing-cursor {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        background-color: black;
+        border-radius: 50%; /* Make it round */
+        animation: pulse 1s infinite;
+      }
+      .bigtitle {
+        width: 100%;
+        height: 200px;
+      }
+      .fade-in {
+        opacity: 0;
+        transition: opacity 0.2s ease-in-out; /* 1 second fade time */
+        visibility: hidden;
+      }
+
+      .fade-in.visible {
+        opacity: 1;
+        visibility: visible;
+      }
+
+      .small-caps {
+          font-variant: small-caps;
+      }
+
+
+      @keyframes pulse {
+        0%,
+        100% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.5);
+        }
+      }
+
+      #footer-logo {
+        position: fixed; /* Fixed position - stays in the same place even if you scroll */
+        bottom: 10px; /* 10px from the bottom */
+        left: 10px; /* 10px from the left */
+        z-index: 1000; /* Ensure it appears on top of other elements */
+      }
+      #footer-logo img {
+        width: 50px; /* Adjust the width as necessary */
+        height: auto; /* Keep the logo aspect ratio */
+      }
+
+      th,
+      td {
+        font-family: calibri;
+        border: 1px solid #ddd;
+        padding: 8px;
+      }
+      th {
+        background-color: #f2f2f2;
+      }
+      tr:nth-child(even) {
+        background-color: #f9f9f9;
+      }
+      tr:hover {
+        background-color: #ddd;
+      }
+      th,
+      td {
+        text-align: left;
+      }
+      .fixed-width {
+        font-weight: bold;
+        width: 50%;
+      }
+      th {
+        background-color: #953b3f;
+        color: white;
+      }
+      hr {
+        width: 50%;
+        border: 1px solid #ddd;
+        margin: 20px 0;
+      }
+      .custom-title {
+        font-family: calibri; /* 更改字体类型 */
+        color: #000000; /* 更改字体颜色 */
+        font-size: 32px; /* 更改字体大小 */
+        text-align: center; /* 文本居中对齐 */
+        margin-top: 20px; /* 增加顶部边距 */
+      }
+      .custom-paragraph {
+        text-indent: 2em;
+      }
+      .problem-content p {
+        margin: 0; /* 移除段落边距 */
+        text-indent: 0; /* 确保没有缩进 */
+        line-height: 1.5; /* 保持行高 */
+        display: block; /* 改回块级显示 */
+        margin-bottom: 0.5em; /* 添加适当的底部间距 */
+      }
+
+      .problem-content {
+        margin: 10px 0;
+        min-width: 600px;
+        white-space: normal; /* 允许正常的文本换行 */
+        line-height: 1.6; /* 调整行高 */
+      }
+      #examples tr th{
+        width: 300px;
+      }
+      .logo {
+        height: 300px; /* 或者使用宽度width */
+        margin-right: 1%; /* 与标题文本的间距 */
+      }
+      .logotitle {
+        display: flex;
+      }
+      .org {
+        display: flex; /* 使用Flexbox布局 */
+        align-items: center; /* 垂直居中 */
+        justify-content: center; /* 水平居中 */
+        width: 100%; /* 容器宽度设为100% */
+      }
+
+      .organization {
+        width: 20%; /* 图片宽度设为容器宽度的一半 */
+        height: auto;
+        margin: 0 80px; /* 高度自动调整保持图片比例 */
+        object-fit: contain; /* 如果图片比例不同，保持图片在容器内完整显示 */
+      }
+      /* .peking{
+      height: 105;
+    } */
+      .org-name {
+        font-size: 2rem;
+        font-family: calibri;
+      }
+      .data-explorer {
+        display: flex;
+        align-items: center; /* 垂直居中 */
+        justify-content: space-between; /* 在元素之间保持空间 */
+      }
+      .problem-content {
+        margin: 10px 0;
+        min-width: 600px; /* 设置最小内容宽度 */
+      }
+
+      .problem-content p {
+        margin-bottom: 10px;
+      }
+
+      .problem-content pre {
+        background-color: #f5f5f5;
+        padding: 10px;
+        border-radius: 4px;
+        max-width: 100%;
+        overflow-x: auto;
+      }
+
+      .problem-content table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 10px 0;
+        max-width: 100%;
+        overflow-x: auto;
+      }
+
+      .problem-content th,
+      .problem-content td {
+        border: 1px solid #ddd;
+        padding: 8px;
+      }
+
+      /* 调整表格样式 */
+      .scrollable-div table {
+        width: 100%; /* 确保表格占满容器 */
+        table-layout: fixed; /* 使用固定表格布局 */
+      }
+
+      .scrollable-div table td:first-child {
+        min-width: 150px; /* 减小最小宽度 */
+        max-width: 150px; /* 减小最大宽度 */
+        white-space: nowrap;
+      }
+
+      .scrollable-div table td:not(.left-col) {
+        width: auto; /* 让右侧单元格自动占用剩余空间 */
+        word-wrap: break-word; /* 允许长文本自动换行 */
+      }
+
+      /* 确保数学公式和文本在同一行 */
+      .MathJax {
+        display: inline !important;
+        margin: 0 2px; /* 给数学公式添加一点 */
+      }
+
+      .btn-custom {
+        transition: all 0.3s ease;
+        margin: 5px;
+        background-color: rgba(238,122,130,.6)!important;
+        border: 1px solid #e9ecef;
+        color: #8e959c; /* 更浅的文字颜色 */
+      }
+
+      .btn-custom:hover {
+        background: #f8f9fa;
+        border-color: #dee2e6;
+        color: #6c757d; /* hover时文字颜色加深 */
+      }
+
+      /* 普通按钮的选中状态 */
+      .btn-custom.active {
+        background: linear-gradient(45deg, #ff6b6b, #ff8e8e)!important; /* 更亮的渐变色 */
+        color: white;
+        border-color: #ff6b6b;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* 更轻的阴影 */
+      }
+
+      /* .btn-row 内按钮的选中状态 */
+      .btn-row .btn-custom.active {
+        background: linear-gradient(45deg, #953b3f, #ff6b6b); /* 更深的渐变色 */
+        color: white;
+        border-color: #953b3f;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* 稍重的阴影 */
+      }
+
+      .btn-primary {
+        background: linear-gradient(45deg, #ff6b6b, #ff8e8e);
+        border-color: #ff6b6b;
+      }
+
+      .btn-primary:hover {
+        background: linear-gradient(45deg, #ff5252, #ff7070);
+        border-color: #ff5252;
+      }
+
+      .leaderboard-title {
+        text-align: left;
+        margin-bottom: 10px; /* 添加一点空间让标题和表格分开 */
+      }
+
+      .data-explorer-table td:first-child {
+        min-width: 120px;
+        max-width: 120px;
+        text-align: center; /* 文本居中 */
+        padding: 8px 12px; /* 增加一些内边距 */
+      }
+
+      .table thead th {
+        text-align: center;
+        vertical-align: middle;
+        background-color: #953b3f;
+        color: white;
+        border: 1px solid #fff;
+      }
+
+      .table thead th[rowspan="2"] {
+        vertical-align: middle;
+      }
+
+      .table thead tr:first-child th {
+        border-bottom: 2px solid #fff;
+      }
+
+      .table thead tr:last-child th {
+        font-size: 0.9em; /* 第二行表头字体稍小 */
+      }
+
+      /* 添加以下规则来调整 Model 列的宽度 */
+      .table thead th:first-child,
+      .table tbody td:first-child {
+        min-width: 300px; /* 设置最小宽度 */
+        max-width: 300px; /* 设置最大宽度 */
+        white-space: normal; /* 允许文本换行 */
+        word-wrap: break-word; /* 允许长单词换行 */
+        text-align: center; /* 文本居中 */
+        padding: 8px 12px; /* 增加一些内边距 */
+      }
+
+      /* 调整表格中的小字体大小 */
+      .table tbody td small {
+        font-size: 0.9em; /* 调整字体大小 */
+        line-height: 1.2; /* 调整行高 */
+        display: block; /* 让文本可以换行 */
+      }
+
+      /* 调整 Div. 1 + 2 等列的宽度 */
+      .table thead th:nth-child(5),
+      .table thead th:nth-child(6),
+      .table thead th:nth-child(7),
+      .table thead th:nth-child(8),
+      .table tbody td:nth-child(5),
+      .table tbody td:nth-child(6),
+      .table tbody td:nth-child(7),
+      .table tbody td:nth-child(8),
+      .table tbody td:nth-child(9),
+      .table tbody td:nth-child(10),
+      .table tbody td:nth-child(11) {
+        min-width: 100px; /* 设置最小宽度 */
+        white-space: nowrap; /* 防止文本换行 */
+        text-align: center; /* 文本居中 */
+        padding: 8px 12px; /* 增加一些内边距 */
+      }
+	  
+      #tableBody td {
+        text-align: center;
+      }
+      
+      #buttonsContainer .btn-row:nth-child(1) button{
+        background-color: #337AB9 !important;
+      }
+      #buttonsContainer .btn-row:nth-child(2) button{
+            background-color: #5695CC !important;
+      }
+      #buttonsContainer .btn-row:nth-child(3) button{
+            background-color: #7BABDE !important;
+      }
+      #buttonsContainer .btn-row:nth-child(4) button{
+            background-color: #9FBFEE !important;
+      }
+      #buttonsContainer .btn-row:nth-child(5) button{
+            background-color: #B9CCF5 !important;
+      }
+      .btn-custom:hover {
+        color: #ffffff;
+      }
+      .btn-custom.active {
+        color: #ffffff;
+        background: #214f78 !important;
+        background-color: #214f78 !important;
+      }
+
+      .blue {
+        color: blue;
+      }
+      .green {
+        color: green;
+      }
+
+    </style>
+
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script>
+      MathJax = {
+        tex: {
+          inlineMath: [
+            ["$", "$"],
+            ["\\(", "\\)"],
+          ],
+          tags: "ams",
+        },
+      };
+    </script>
+    <script
+      id="MathJax-script"
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"
+    ></script>
+    <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.18/dist/katex.css" integrity="sha384-9PvLvaiSKCPkFKB1ZsEoTjgnJn+O3KvEwtsz37/XrkYft3DTk2gHdYvd9oWgW3tV" crossorigin="anonymous">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.18/dist/katex.js" integrity="sha384-zuSLTEzan5q8B3VF09V3GHDwr7/cqxebTOtipDSItrKsHX2qgt+5GB1sti60+AHt" crossorigin="anonymous"></script> -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script
+      async
+      src="https://www.googletagmanager.com/gtag/js?id=G-PYVRSFMDRL"
+    ></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+
+      gtag("js", new Date());
+
+      gtag("config", "G-PYVRSFMDRL");
+    </script>
+    <link
+      href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./static/css/bulma.min.css" />
+    <link rel="stylesheet" href="./static/css/bulma-carousel.min.css" />
+    <link rel="stylesheet" href="./static/css/bulma-slider.min.css" />
+    <link rel="stylesheet" href="./static/css/fontawesome.all.min.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css"
+    />
+    <link rel="stylesheet" href="./static/css/index.css" />
+    <!-- <link rel="icon" href="./static/images/icon.png"> -->
+    <script type="text/javascript" src="static/js/sort-table.js" defer></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script defer src="static/js/fontawesome.all.min.js"></script>
+    <script src="static/js/bulma-carousel.min.js"></script>
+    <script src="static/js/bulma-slider.min.js"></script>
+    <script src="static/js/index.js"></script>
+  </head>
+  <body>
+    <section>
+      <p style="display: none;">Narek has to spend 2 hours with some 2-year-old kids at the kindergarten. He
+        wants to teach them competitive programming, and their first lesson is about
+        palindromes.
+        
+        Narek found out that the kids only know the vowels of the English alphabet
+        (the letters $\mathtt{a}$, $\mathtt{e}$, $\mathtt{i}$,
+        $\mathtt{o}$, and $\mathtt{u}$), so Narek needs to make a string that
+        consists of vowels only. After making the string, he'll ask the kids to count
+        the number of subsequences that are palindromes. Narek wants to keep it
+        simple, so he's looking for a string such that the amount of palindrome
+        subsequences is minimal.
+        
+        Help Narek find a string of length $n$, consisting of lowercase English
+        vowels only (letters $\mathtt{a}$, $\mathtt{e}$, $\mathtt{i}$,
+        $\mathtt{o}$, and $\mathtt{u}$), which minimizes the amount of
+        palindrome$^{\dagger}$ subsequences$^{\ddagger}$ in it.
+        
+        $^{\dagger}$ A string is called a palindrome if it reads the same from
+        left to right and from right to left.
+        
+        $^{\ddagger}$ String $t$ is a subsequence of string $s$ if $t$
+        can be obtained from $s$ by removing several (possibly, zero or all)
+        characters from $s$ and concatenating the remaining ones, without changing
+        their order. For example, $\mathtt{odocs}$ is a subsequence of
+        $\texttt{c}{\color{red}{\texttt{od}}}\texttt{ef}{\color{red}{\texttt{o}}}\texttt{r}{\color{red}{\texttt{c}}}\texttt{e}{\color{red}{\texttt{s}}}$.</p>
+      <div class="bigtitle">
+        <div class="container is-max-desktop">
+          <div class="columns is-centered">
+            <div class="column has-text-centered">
+              <!-- <div class="logotitle"> -->
+              <img src="static/images/full-logo-removebg-preview.png" alt="Logo" class="logo" />
+              <h1 class="title is-1 publication-title">
+                <span class="small-caps">CodeElo</span>: Benchmarking Competition-level Code Generation of LLMs with Human-comparable Elo Ratings
+              </h1>
+              <!-- </div> -->
+              <div class="org">
+                <img
+                  src="static/images/Qwen.jpeg"
+                  alt="Logo"
+                  class="organization"
+                />
+              </div>
+              <!-- <div class="is-size-5 Project Leads">
+                <strong>Project Leads:</strong>
+                <span class="author-block" style="margin-left: 1em"
+                  ><a href="mailto:gaobofei@stu.pku.edu.cn"
+                    >Bofei Gao (gaobofei@stu.pku.edu.cn)</a
+                  >,</span
+                >
+                <span class="author-block" style="margin-left: 1em"
+                  ><a href="mailto:tianyu0421@alibaba-inc.com"
+                    >Tianyu Liu (tianyu0421@alibaba-inc.com)</a
+                  ></span
+                >
+              </div> -->
+
+              <div class="column has-text-centered">
+                <div class="publication-links">
+                  <!-- PDF Link. -->
+                  <span class="link-block">
+                    <a
+                      href="https://arxiv.org/abs/2410.07985"
+                      target="https://arxiv.org/abs/2410.07985"
+                      class="external-link button is-normal is-rounded is-white"
+                    >
+                      <span class="icon">
+                        <i class="fas fa-file-pdf"></i>
+                      </span>
+                      <span>Paper</span>
+                    </a>
+                  </span>
+                  <!-- <span class="link-block">
+                    <a
+                      href="https://github.com/KbsdJames/Omni-MATH"
+                      target="https://github.com/KbsdJames/Omni-MATH"
+                      class="external-link button is-normal is-rounded is-white"
+                    >
+                      <span class="icon">
+                        <i class="fab fa-github"></i>
+                      </span>
+                      <span>Code</span>
+                    </a>
+                  </span> -->
+                  <!-- Dataset Link. -->
+                  <span class="link-block">
+                    <a
+                      href="https://huggingface.co/datasets/KbsdJames/Omni-MATH"
+                      target="https://huggingface.co/datasets/KbsdJames/Omni-MATH"
+                      class="external-link button is-normal is-rounded is-white"
+                    >
+                      <span class="icon">
+                        <p style="font-size: 18px; margin-right: 2rem">🤗</p>
+                      </span>
+                      <span>Datasets</span>
+                    </a>
+                  </span>
+                  <span class="link-block">
+                    <a
+                      href="#leaderboard-table"
+                      class="external-link button is-normal is-rounded is-white"
+                    >
+                      <span class="icon">
+                        <p style="font-size: 18px; margin-right: 2rem">🏆</p>
+                      </span>
+                      <span>Leaderboard</span>
+                    </a>
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="columns is-centered">
+            <h style="color: rgba(74, 59, 43, 0.492);">Great acknowledgment to Mike Mirzayanov for creating the remarkable <a href="https://codeforces.com/" style="color: rgb(145, 167, 227);">Codeforces</a> platform.</h>
+          </div>
+          <!-- <div class="container">
+      <div class="header row center-content">
+        <div class="col text-center">
+          <img src="MathOdyssey_logo.png" width="300px" />
+          <p style="margin-top: -0px">Leaderboard & DATA EXPLORER</p>
+          <a href="https://arxiv.org/abs/2406.18321">arXiv</a> |
+          <a href="https://www.agiodyssey.org/#/gaic">Competition</a> | �� Try
+          <a href="https://github.com/protagolabs/odyssey-math">GitHub</a>
+        </div>
+      </div> -->
+          <!-- <img
+            src="25541724923794_.pic.jpg"
+            class="img-fluid"
+            alt="描述性文字"
+          /> -->
+          <h2 class="custom-title">Introduction of <span class="small-caps">CodeElo</span> Benchmark</h2>
+          <p class="custom-paragraph">
+            With the increasing code reasoning capabilities of existing large language models (LLMs) and breakthroughs in reasoning models like OpenAI o1 and o3, there is a growing need to develop more challenging and comprehensive benchmarks that effectively test their sophisticated competition-level coding abilities. 
+            Existing benchmarks, like LiveCodeBench and USACO, fall short due to the unavailability of private test cases, lack of support for special judges, and misaligned execution environments. 
+            To bridge this gap, we introduce <span class="small-caps">CodeElo</span>, a standardized competition-level code generation benchmark that effectively addresses all these challenges for the first time. 
+            <span class="small-caps">CodeElo</span> benchmark is mainly based on the official CodeForces platform and tries to align with the platform as much as possible. 
+            We compile the recent six months of contest problems on CodeForces with detailed information such as contest divisions, problem difficulty ratings, and problem algorithm tags. 
+            We introduce a unique judging method in which problems are submitted directly to the platform and develop a reliable Elo rating calculation system that aligns with the platform and is comparable with human participants but has lower variance. 
+            By testing on our <span class="small-caps">CodeElo</span>, we provide the Elo ratings of 30 existing popular open-source and 3 proprietary LLMs for the first time. 
+            The results show that o1-mini and QwQ-32B-Preview stand out significantly, achieving Elo ratings of 1578 and 1261, respectively, while other models struggle even with the easiest problems, placing in the lowest 20 percent among all human participants. 
+            Detailed analysis experiments are also conducted to provide insights into performance across algorithms and comparisons between using C++ and Python, which can suggest directions for further studies. 
+          </p>
+          <hr />
+          <h2 class="leaderboard-title" id="leaderboard-table"> 
+            🏆 Leaderboard
+          </h2>
+        </div>
+        <table class="table">
+          <thead>
+            <tr>
+              <th rowspan="2">Model</th>
+              <th rowspan="4" style="min-width: 150px;">Size</th>
+              <th colspan="6">Elo Rating</th>
+              <th colspan="3">Pass Rate</th>
+              <th colspan="4">Pass@n</th>
+              <th colspan="16">Tags</th>
+            </tr>
+            <tr>
+              <!-- Elo Rating 下的子列 -->
+              <th style="min-width: 128px;">Rating</th>
+              <th>Percentile</th>
+              <th>Div. 1 + 2</th>
+              <th>Div. 2</th>
+              <th>Div. 3</th>
+              <th>Div. 4</th>
+
+              <!-- Pass Rate 下的子列 -->
+              <th>Easy</th>
+              <th>Medium</th>
+              <th>Hard</th>
+
+              <!-- Pass@k 下的子列 -->
+              <th>1</th>
+              <th>2</th>
+              <th>4</th>
+              <th>8</th>
+
+              <!-- Tags 下的子列 -->
+              <th>greedy</th>
+              <th>math</th>
+              <th>implementation</th>
+              <th>brute force</th>
+              <th>dp</th>
+              <th>data structures</th>
+              <th>constructive algorithms</th>
+              <th>binary search</th>
+              <th>sortings</th>
+              <th>graphs</th>
+              <th>dfs and similar</th>
+              <th>number theory</th>
+              <th>trees</th>
+              <th>combinatorics</th>
+              <th>two pointers</th>
+              <th>bitmasks</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+        <div class="container is-max-desktop">
+          <hr />
+          <!-- Buttons -->
+          <div class="data-explorer">
+            <h2>🔍 Data Explorer</h2>
+            <div class="dropdown">
+              <button
+                class="btn btn-primary dropdown-toggle"
+                type="button"
+                id="mainDropdown"
+                data-toggle="dropdown"
+                aria-haspopup="true"
+                aria-expanded="false"
+              >
+                Contest Division
+              </button>
+              <div class="dropdown-menu">
+                <a class="dropdown-item" href="#" data-value="contest"
+                  >Contest Division</a
+                >
+                <a class="dropdown-item" href="#" data-value="rating"
+                  >Problem Rating</a
+                >
+                <a class="dropdown-item" href="#" data-value="tag"
+                  >Problem Tag</a
+                >
+              </div>
+            </div>
+          </div>
+          <div id="buttonsContainer"></div>
+          <!-- Scrollable Content Area -->
+          <div class="scrollable-div">
+            <table class="data-explorer-table">
+              <tbody>
+                <!-- 动态内容将在这里插入 -->
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Key -->
+          <!-- <div class="key mt-3 text-center">
+        <span class="key-item correct">Correct</span>
+        <span class="key-item incorrect">Incorrect</span>
+      </div> -->
+
+          <div class="navigation-buttons text-center mt-3">
+            <button type="button" id="leftButton" class="btn btn-secondary">
+              &lt;&lt;
+            </button>
+            <button type="button" id="rightButton" class="btn btn-secondary">
+              &gt;&gt;
+            </button>
+            <div class="mt-2">
+              <span id="currentPage">0</span> / <span id="totalPages">0</span>
+            </div>
+          </div>
+
+          <!-- Footer -->
+          <div class="footer text-center mt-3">
+            This site is heavily inspired by the
+            <a href="https://minerva-demo.github.io">Minerva sample explorer</a>
+            and Llemma.
+          </div>
+        </div>
+      </div>
+
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+      <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+      <script>
+        $(document).ready(function () {
+          // 初始化 processedData
+          let processedData = null;
+
+          // 处理数据分类的函数
+          function processDataByType(data) {
+            // 1. Contest Division 分类
+            const divisionData = {};
+            data.forEach((problem) => {
+              const div = problem.div || "Unknown";
+              const prefix = problem.problem_id.substring(0, 4);
+
+              if (!divisionData[div]) {
+                divisionData[div] = {};
+              }
+              if (!divisionData[div][prefix]) {
+                divisionData[div][prefix] = [];
+              }
+              divisionData[div][prefix].push(problem);
+            });
+
+            // 2. Problem Rating 分类
+            const ratingData = {};
+            data.forEach((problem) => {
+              const rating = problem.rating || "Unknown";
+              if (!ratingData[rating]) {
+                ratingData[rating] = [];
+              }
+              ratingData[rating].push(problem);
+            });
+
+            // 3. Problem Tag 分类
+            const tagData = {};
+            const tagCount = {};
+            data.forEach((problem) => {
+              if (Array.isArray(problem.tags)) {
+                problem.tags.forEach((tag) => {
+                  if (!tagCount[tag]) tagCount[tag] = 0;
+                  tagCount[tag]++;
+
+                  if (!tagData[tag]) {
+                    tagData[tag] = [];
+                  }
+                  tagData[tag].push(problem);
+                });
+              }
+            });
+
+            // 按出现次数排序 tags
+            const sortedTags = Object.entries(tagCount)
+              .sort(([, a], [, b]) => b - a)
+              .map(([tag]) => tag);
+
+            return {
+              divisionData,
+              ratingData,
+              sortedTags,
+              tagData,
+            };
+          }
+
+          // 从 problems.json 加载数据
+          $.getJSON("problems.json", function (data) {
+            // 初始化时处理所有数据
+            processedData = processDataByType(data);
+
+            // 默认显示 Contest Division
+            updateDisplay("contest", processedData);
+
+            // 处理下拉菜单切换
+            $("#mainDropdown")
+              .next(".dropdown-menu")
+              .find(".dropdown-item")
+              .click(function (e) {
+                e.preventDefault();
+                const selectedType = $(this).data("value");
+                $("#mainDropdown").text($(this).text());
+
+                // 保存当前滚动位置
+                const scrollPosition = window.scrollY;
+
+                // 更新显示
+                updateDisplay(selectedType, processedData);
+
+                // 恢复滚动位置
+                window.scrollTo(0, scrollPosition);
+              });
+
+            // 处理按钮点击事件
+            $("#buttonsContainer").on("click", "button", function () {
+              const div = $(this).data("div");
+              const prefix = $(this).data("prefix");
+              const rating = $(this).data("rating");
+              const tag = $(this).data("tag");
+
+              // 根据不同类型的按钮显示对应的数据
+              if (div && prefix) {
+                window.currentData = processedData.divisionData[div][prefix];
+              } else if (rating) {
+                window.currentData = processedData.ratingData[rating];
+              } else if (tag) {
+                window.currentData = processedData.tagData[tag];
+              }
+
+              // 更新页面显示
+              currentPage = 1;
+              updateData(currentPage);
+            });
+          });
+
+          // 监听problems数据加载完成事件
+          document.addEventListener("problemsLoaded", function (event) {
+            console.log("Problems loaded, initializing UI...");
+          });
+
+          let currentPage = 1;
+          let totalPages = 0;
+
+          function processContent(content) {
+            if (!content) return "";
+
+            const mathStorage = {
+              expressions: [],
+              count: 0,
+              store: function (match) {
+                console.log("Match:", match);
+                match = match.replace(/\n/g, " ");
+                console.log("Match:", match);
+                this.expressions.push(match);
+                return `@@MATH${this.count++}@@`;
+              },
+              restore: function (text) {
+                let result = text;
+                for (let i = 0; i < this.count; i++) {
+                  // let expression = MathJax.tex2chtml(this.expressions[i]);
+                  result = result.replace(`@@MATH${i}@@`, this.expressions[i]);
+                }
+                return result;
+              },
+            };
+
+            // 处理内容
+            let protectedContent = content;
+
+            // 1. 保护数学公式
+            protectedContent = protectedContent.replace(
+                /\$\$\$[\s\S]+?\$\$\$|\$\$[\s\S]+?\$\$|\$[^\$]+?\$/g,
+                (match) => {
+                    return mathStorage.store(match);
+                }
+            );
+
+
+            // 2. 处理HTML内容
+            if (protectedContent.includes("<")) {
+              // 先解码JSON中的\n为实际的换行符
+              protectedContent = protectedContent.replace(/\\n/g, "\n");
+
+              // 特别处理pre标签内容，确保换行符被正确保留
+              protectedContent = protectedContent.replace(
+                /(<pre[^>]*>)([\s\S]*?)(<\/pre>)/g,
+                (match, start, content, end) => {
+                  // 移除开头和结尾的多余换行符
+                  content = content.replace(/^\n+|\n+$/g, "");
+                  // 保持中间的换行符
+                  return start + content + end;
+                }
+              );
+            } else {
+              // 如果不是HTML内容，使用marked处理
+              marked.setOptions({
+                breaks: false,
+                gfm: true,
+              });
+              protectedContent = marked.parse(protectedContent);
+            }
+
+            // 3. 还原数学公式
+            return mathStorage.restore(protectedContent);
+          }
+
+          // 修改MathJax渲染部分
+          function renderMathJax(elements) {
+            try {
+              // 确保elements是一个数组
+              const elementsArray = elements.filter((id) => {
+                const el = document.getElementById(id);
+                return el && el.innerHTML.trim();
+              });
+
+              if (elementsArray.length === 0) return Promise.resolve();
+
+              // 先清理所有元素的内容格式, 导致Examples换行丢失
+              // elementsArray.forEach((id) => {
+              //   const el = document.getElementById(id);
+              //   if (el) {
+              //     el.innerHTML = el.innerHTML
+              //       .replace(/>\s+</g, "><") // 清理标签间的空白
+              //       .replace(/\s+/g, " ") // 规范化空格
+              //       .trim();
+              //   }
+              // });
+
+              // 然后渲染数学公式
+              return Promise.all(
+                elementsArray.map((id) => {
+                  const el = document.getElementById(id);
+                  // return renderMathInElement(el);
+                  return MathJax.typesetPromise([el]);
+                })
+              );
+            } catch (error) {
+              console.error("MathJax渲染错误:", error);
+              return Promise.resolve();
+            }
+          }
+
+          function updateData(idx) {
+            try {
+              const currentItem = window.currentData[idx - 1];
+              console.log(currentItem, "==currentItem", currentItem.tags);
+              // 创建表格内容
+              let tableContent = `
+                <tr>
+                  <td class="left-col"><b style="color: crimson;">Source</b></td>
+                  <td>${
+                    currentItem.div + " - " + currentItem.problem_id || ""
+                  }</td>
+                </tr>
+                <tr>
+                  <td class="left-col"><b style="color: crimson;">URL</b></td>
+                  <td><a href="${currentItem.url}" target="_blank">${
+                currentItem.url
+              }</a></td>
+                </tr>
+                <tr>
+                  <td class="left-col"><b style="color: crimson;">Title</b></td>
+                  <td>${currentItem.title || ""}</td>
+                </tr>
+                <tr>
+                  <td class="left-col"><b style="color: crimson;">Tags</b></td>
+                  <td>${currentItem.tags.join(", ") || ""}</td>
+                </tr>
+                <tr>
+                  <td class="left-col"><b style="color: crimson;">Rating</b></td>
+                  <td>${currentItem.rating || ""}</td>
+                </tr>
+                <tr>
+                  <td class="left-col"><b style="color: crimson;">Limit</b></td>
+                  <td>${currentItem.time_limit_ms || ""}ms / ${currentItem.memory_limit_mb}MB</td>
+                </tr>
+              `;
+
+              // 添加必需字段
+              const requiredFields = {
+                Description: "description",
+              };
+
+              // 添加可选字段
+              const optionalFields = {
+                Input: "input",
+                Output: "output",
+                Interaction: "interaction",
+                Examples: "examples",
+                Note: "note",
+              };
+
+              // 添加必需字段到表格
+              Object.entries(requiredFields).forEach(([label, field]) => {
+                tableContent += `
+                  <tr>
+                    <td class="left-col"><b style="color: crimson;">${label}</b></td>
+                    <td><div id="${field.toLowerCase()}" class="problem-content"></div></td>
+                  </tr>`;
+              });
+
+              // 添加可选字段（只有当字段存在且不为空时才添加）
+              Object.entries(optionalFields).forEach(([label, field]) => {
+                if (label == "Examples") {
+                  // 特别处理 Examples 字段，直接使用原始内容，不经过任何处理
+                  if (currentItem.examples) {
+                    // 先解码 JSON 中的转义字符
+                    const decodedExamples = currentItem.examples
+                    .replace(
+                      /\n/g,
+                      "\n"
+                    ) // 处理换行符
+                      .replace(/\\"/g, '"') // 处理引号
+                      .replace(/\\'/g, "'") // 处理单引号
+                      .replace(/\\\\/g, "\\") // 处理反斜杠
+                      .replace(
+                        /<table class='vjudge_sample'>/g,
+                        '<table class="vjudge_sample">'
+                      ) // 保持原始表格样式
+                      .replace(
+                        /<th>Input<\/th>/g,
+                        '<th style="background-color: #953b3f; color: white;">Input</th>'
+                      ) // 使用红色样式
+                      .replace(
+                        /<th>Output<\/th>/g,
+                        '<th style="background-color: #953b3f; color: white;">Output</th>'
+                      ) // 使用红色样式
+                      .replace(
+                        /<pre>/g,
+                        '<pre style="white-space: pre-wrap;">'
+                      ); // 确保pre标签内容正确换行
+
+                    tableContent += `
+                    <tr>
+                    <td class="left-col"><b style="color: crimson;">Examples</b></td>
+                    <td><div id="examples" class="problem-content">${decodedExamples}</div></td>
+                    </tr>`;
+                  }
+                  return;
+                }
+
+                if (currentItem[field] && currentItem[field].trim() !== "") {
+                  tableContent += `
+                    <tr>
+                      <td class="left-col"><b style="color: crimson;">${label}</b></td>
+                      <td><div id="${field.toLowerCase()}" class="problem-content"></div></td>
+                    </tr>`;
+                }
+              });
+
+              // 更新表格内容
+              $(".scrollable-div table tbody").html(tableContent);
+
+              // 设置内容
+              Object.entries({ ...requiredFields, ...optionalFields }).forEach(
+                ([_, field]) => {
+                  if (currentItem[field]) {
+                    $(`#${field.toLowerCase()}`).html(
+                      processContent(currentItem[field])
+                    );
+                  }
+                }
+              );
+
+              // 渲染数学公式
+              const elementsToRender = Object.values({
+                ...requiredFields,
+                ...optionalFields,
+              })
+                .map((field) => field.toLowerCase())
+                .filter((id) => document.getElementById(id));
+              
+              // console.log("AAAA", elementsToRender);
+              renderMathJax(elementsToRender)
+                .catch((err) => console.error("MathJax渲染错误:", err))
+                .finally(() => {
+                  $(".fade-in").addClass("visible");
+                });
+            } catch (error) {
+              console.error("更新数据时出错:", error);
+            }
+          }
+
+          function updateButtonStatus() {
+            // Disable the left button if at the beginning
+            if (currentPage <= 1) {
+              $("#leftButton").prop("disabled", true);
+            } else {
+              $("#leftButton").prop("disabled", false);
+            }
+
+            // Disable the right button if at the end
+            if (currentPage >= totalPages) {
+              $("#rightButton").prop("disabled", true);
+            } else {
+              $("#rightButton").prop("disabled", false);
+            }
+          }
+
+          // Initial button status update
+          updateButtonStatus();
+
+          $("#leftButton").click(function () {
+            if (currentPage > 1) {
+              currentPage--;
+              $("#currentPage").text(currentPage);
+              updateData(currentPage);
+            }
+            updateButtonStatus();
+          });
+
+          $("#rightButton").click(function () {
+            if (currentPage < totalPages) {
+              currentPage++;
+              $("#currentPage").text(currentPage);
+              updateData(currentPage);
+            }
+            updateButtonStatus();
+          });
+
+          $(document).keydown(function (e) {
+            switch (e.which) {
+              case 37: // left arrow key
+                if (currentPage > 1) {
+                  currentPage--;
+                  $("#currentPage").text(currentPage);
+                  updateData(currentPage);
+                }
+                updateButtonStatus();
+                break;
+
+              case 39: // right arrow key
+                if (currentPage < totalPages) {
+                  currentPage++;
+                  $("#currentPage").text(currentPage);
+                  updateData(currentPage);
+                }
+                updateButtonStatus();
+                break;
+
+              default:
+                return; // exit this handler for other keys
+            }
+            e.preventDefault(); // prevent the default action (scroll / move caret)
+          });
+
+          $(".buttons button").click(function () {
+            // Revert all buttons to .btn-light class
+            $(".buttons button")
+              .removeClass("btn-primary")
+              .addClass("btn-light");
+
+            // Set the clicked button to .btn-primary class
+            $(this).removeClass("btn-light").addClass("btn-primary");
+
+            // get the "data" attribute of this
+            let subject = $(this).attr("data");
+            console.log(subject);
+
+            changeSubject(subject);
+          });
+
+          // 更新显示的函数
+          function updateDisplay(type, processedData) {
+            const buttonsContainer = $("#buttonsContainer");
+            buttonsContainer.empty();
+
+            switch (type) {
+              case "contest":
+                Object.entries(processedData.divisionData)
+                  .sort(([a], [b]) => {
+                    const numA = parseInt(a.match(/\d+/)[0]);
+                    const numB = parseInt(b.match(/\d+/)[0]);
+                    return numA - numB;
+                  })
+                  .forEach(([div, prefixes]) => {
+                    const divSection = $('<div class="btn-row"></div>');
+                    divSection.append(`<div class="row-title">${div}</div>`);
+
+                    Object.keys(prefixes)
+                      .sort()
+                      .forEach((prefix) => {
+                        const button = $(
+                          `<button type="button" class="btn btn-custom" data-div="${div}" data-prefix="${prefix}">${prefix}</button>`
+                        );
+                        button.click(function () {
+                          // 移除所有按钮的active类
+                          $('.btn-custom').removeClass('active');
+                          // 给当前点击的按钮添加active类
+                          $(this).addClass('active');
+                          
+                          // 更新总页数和当前页
+                          totalPages = processedData.divisionData[div][prefix].length;
+                          $("#totalPages").text(totalPages);
+                          currentPage = 1;
+                          $("#currentPage").text(currentPage);
+                          updateButtonStatus();
+                        });
+                        divSection.append(button);
+                      });
+
+                    buttonsContainer.append(divSection);
+                  });
+                break;
+
+              case "rating":
+                Object.keys(processedData.ratingData)
+                  .sort((a, b) => parseInt(a) - parseInt(b))
+                  .forEach((rating) => {
+                    if (rating !== "Unknown") {
+                      const button = $(
+                        `<button type="button" class="btn btn-custom" data-rating="${rating}">Rating ${rating} (${processedData.ratingData[rating].length})</button>`
+                      );
+                      button.click(function () {
+                        // 移除所有按钮的active类
+                        $('.btn-custom').removeClass('active');
+                        // 给当前点击的按钮添加active类
+                        $(this).addClass('active');
+                        
+                        // 更新总页数和当前页
+                        totalPages = processedData.ratingData[rating].length;
+                        $("#totalPages").text(totalPages);
+                        currentPage = 1;
+                        $("#currentPage").text(currentPage);
+                        updateButtonStatus();
+                      });
+                      buttonsContainer.append(button);
+                    }
+                  });
+                break;
+
+              case "tag":
+                processedData.sortedTags.forEach((tag) => {
+                  const button = $(
+                    `<button type="button" class="btn btn-custom" data-tag="${tag}">${tag} (${processedData.tagData[tag].length})</button>`
+                  );
+                  button.click(function () {
+                    // 移除所有按钮的active类
+                    $('.btn-custom').removeClass('active');
+                    // 给当前点击的按钮添加active类
+                    $(this).addClass('active');
+                    
+                    // 更新总页数和当前页
+                    totalPages = processedData.tagData[tag].length;
+                    $("#totalPages").text(totalPages);
+                    currentPage = 1;
+                    $("#currentPage").text(currentPage);
+                    updateButtonStatus();
+                  });
+                  buttonsContainer.append(button);
+                });
+                break;
+            }
+          }
+
+          function generateModelTable(data) {
+            const tbody = document.querySelector("#tableBody");
+            if (!tbody) {
+              console.error("Table body element not found");
+              return;
+            }
+
+            tbody.innerHTML = "";
+
+            // 按Elo Rating排序
+            const sortedModels = Object.entries(data).sort(
+              (a, b) => b[1]["Elo Rating"] - a[1]["Elo Rating"]
+            );
+
+            function getColorByEloRating(eloRating) {
+                if (eloRating < 1200) {
+                    return "#808080"; // Grey for Newbie
+                } else if (eloRating < 1400) {
+                    return "#008000"; // Green for Pupil
+                } else if (eloRating < 1600) {
+                    return "#03a89e"; // Cyan for Specialist
+                } else if (eloRating < 1900) {
+                    return "#0000ff"; // Blue for Expert
+                } else if (eloRating < 2100) {
+                    return "#aa00aa"; // Purple for Candidate Master
+                } else if (eloRating < 2400) {
+                    return "#ff8c00"; // Orange for Master and International Master
+                } else if (eloRating < 3000) {
+                    return "#ff0000"; // Red for Grandmaster and International Grandmaster
+                } else if (eloRating < 4000) {
+                    return "black + red"; // Black with Red letterhead for Legendary Grandmaster
+                } else {
+                    return "red + black"; // Red with Black letterhead for Tourist
+                }
+            }
+
+
+            for (const [modelName, modelData] of sortedModels) {
+              const row = document.createElement("tr");
+              const color = getColorByEloRating(modelData["Elo Rating"]);
+              row.innerHTML = `
+                    <td><small style="font-weight: bold;color: ${color};">${modelName}</small></td>
+                    <td>${modelData["Size"]}</td>
+                    <td style="color: ${color};">${modelData["Elo Rating"]}</td>
+                    <td>${modelData["percentile"]?.toFixed(1)}</td>
+                    <td>${modelData["Div. 1 + 2"]}</td>
+                    <td>${modelData["Div. 2"]}</td>
+                    <td>${modelData["Div. 3"]}</td>
+                    <td>${modelData["Div. 4"]}</td>
+                    <td>${modelData["Pass Rate Easy"]?.toFixed(2)}</td>
+                    <td>${modelData["Pass Rate Medium"]?.toFixed(2)}</td>
+                    <td>${modelData["Pass Rate Hard"]?.toFixed(2)}</td>
+                    <td>${modelData["Pass@1"]?.toFixed(2)}</td>
+                    <td>${modelData["Pass@2"]?.toFixed(2)}</td>
+                    <td>${modelData["Pass@4"]?.toFixed(2)}</td>
+                    <td>${modelData["Pass@8"]?.toFixed(2)}</td>
+                    <td>${modelData["Tag: greedy"]?.toFixed(2)}</td>
+                    <td>${modelData["Tag: math"]?.toFixed(2)}</td>
+                    <td>${modelData["Tag: implementation"]?.toFixed(2)}</td>
+                    <td>${modelData["Tag: brute force"]?.toFixed(2)}</td>
+                    <td>${modelData["Tag: dp"]?.toFixed(2)}</td>
+                    <td>${modelData["Tag: data structures"]?.toFixed(2)}</td>
+                    <td>${modelData["Tag: constructive algorithms"]?.toFixed(
+                      2
+                    )}</td>
+                    <td>${modelData["Tag: binary search"]?.toFixed(2)}</td>
+                    <td>${modelData["Tag: sortings"]?.toFixed(2)}</td>
+                    <td>${modelData["Tag: graphs"]?.toFixed(2)}</td>
+                    <td>${modelData["Tag: dfs and similar"]?.toFixed(2)}</td>
+                    <td>${modelData["Tag: number theory"]?.toFixed(2)}</td>
+                    <td>${modelData["Tag: trees"]?.toFixed(2)}</td>
+                    <td>${modelData["Tag: combinatorics"]?.toFixed(2)}</td>
+                    <td>${modelData["Tag: two pointers"]?.toFixed(2)}</td>
+                    <td>${modelData["Tag: bitmasks"]?.toFixed(2)}</td>
+                `;
+              tbody.appendChild(row);
+            }
+            console.log("Table generated successfully");
+          }
+
+          $(document).ready(function () {
+            console.log("DOMContentLoaded event fired");
+
+            // 初始化表格
+            fetch("model_data.json")
+              .then((response) => response.json())
+              .then((data) => generateModelTable(data))
+              .catch((error) =>
+                console.error("Error loading model data:", error)
+              );
+
+            // 其他初始化代码...
+          });
+        });
+      </script>
+    </section>
+  </body>
+</html>
